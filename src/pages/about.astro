@@ -1,0 +1,80 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+---
+
+<BaseLayout title="About">
+  <Header slot="header" />
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h1 class="text-3xl sm:text-4xl font-bold text-white mb-8">
+      About VSThunter
+    </h1>
+
+    <div class="prose prose-invert prose-lg max-w-none">
+      <p class="text-dark-200 leading-relaxed">
+        VSThunter is a curated directory of the best VST plugins for music
+        production. Whether you're a professional producer, a bedroom musician,
+        or a sound designer, our goal is to help you discover high-quality
+        plugins that inspire your creativity.
+      </p>
+
+      <h2 class="text-2xl font-bold text-white mt-12 mb-4">Our Mission</h2>
+      <p class="text-dark-200 leading-relaxed">
+        With thousands of plugins available, finding the right tools for your
+        workflow can be overwhelming. VSThunter cuts through the noise by
+        featuring only actively maintained, high-quality plugins across all
+        categories — from synthesizers and effects to samplers and utility
+        tools.
+      </p>
+
+      <h2 class="text-2xl font-bold text-white mt-12 mb-4">What We Feature</h2>
+      <ul class="space-y-3 text-dark-200">
+        <li class="flex items-start gap-3">
+          <span class="text-accent-light mt-1">&#9679;</span>
+          <span
+            ><strong class="text-white">Synthesizers:</strong> Wavetable, analog modeling,
+            FM, and virtual analog synths</span
+          >
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-accent-light mt-1">&#9679;</span>
+          <span
+            ><strong class="text-white">Effects:</strong> Reverb, delay, distortion,
+            modulation, and mastering tools</span
+          >
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-accent-light mt-1">&#9679;</span>
+          <span
+            ><strong class="text-white">Samplers:</strong> Software samplers, romplers,
+            and granular instruments</span
+          >
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-accent-light mt-1">&#9679;</span>
+          <span
+            ><strong class="text-white">Utilities:</strong> Meters, analyzers, MIDI
+            tools, and workflow enhancers</span
+          >
+        </li>
+      </ul>
+
+      <h2 class="text-2xl font-bold text-white mt-12 mb-4">Plugin Standards</h2>
+      <p class="text-dark-200 leading-relaxed">
+        We list plugins in all major formats including VST3, VST2, AU, AAX,
+        CLAP, and LV2. Our directory supports Windows, macOS, and Linux
+        platforms, with cross-platform compatibility clearly indicated for each
+        plugin.
+      </p>
+
+      <h2 class="text-2xl font-bold text-white mt-12 mb-4">Disclaimer</h2>
+      <p class="text-dark-200 leading-relaxed">
+        VSThunter is an independent directory and is not affiliated with any of
+        the plugin developers listed. We provide links to official download
+        pages only. All trademarks and copyrights belong to their respective
+        owners. Prices and availability are subject to change — always check the
+        developer's website for the most current information.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,17 +1,79 @@
 ---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import PluginCard from "../components/PluginCard.astro";
+import { getCollection } from "astro:content";
 
+const allPlugins = await getCollection("plugins", ({ data }) => data.isActive);
+const featured = allPlugins.slice(0, 3);
+const recent = allPlugins.sort(
+  (a, b) =>
+    new Date(b.data.dateAdded).getTime() - new Date(a.data.dateAdded).getTime(),
+);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="Home">
+  <Header slot="header" />
+  <section class="relative overflow-hidden">
+    <div
+      class="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none"
+      style="background-image: url('/images/bg-music.webp')"
+    >
+    </div>
+    <div
+      class="absolute inset-0 bg-gradient-to-b from-accent/5 via-transparent to-transparent pointer-events-none"
+    >
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      <div class="text-center max-w-3xl mx-auto">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
+          <span
+            class="bg-gradient-to-r from-accent via-accent-light to-white bg-clip-text text-transparent"
+          >
+            Discover the Best VST Plugins
+          </span>
+        </h1>
+        <p class="mt-6 text-lg sm:text-xl text-dark-200 leading-relaxed">
+          Curated collection of free and paid VST plugins for music production.
+          Find synths, effects, samplers, and utilities — all in one place.
+        </p>
+        <div
+          class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
+          <a
+            href="/plugins"
+            class="px-8 py-3 rounded-xl bg-accent text-white font-semibold hover:bg-accent-dark transition-colors shadow-lg shadow-accent/25"
+          >
+            Browse All Plugins
+          </a>
+          <a
+            href="/about"
+            class="px-8 py-3 rounded-xl border border-dark-500 text-dark-200 font-semibold hover:border-dark-400 hover:text-white transition-colors"
+          >
+            Learn More
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {
+    featured.length > 0 && (
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <h2 class="text-2xl font-bold text-white mb-8">Featured Plugins</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {featured.map((plugin) => (
+            <PluginCard plugin={plugin} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <h2 class="text-2xl font-bold text-white mb-8">Recently Added</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {recent.map((plugin) => <PluginCard plugin={plugin} />)}
+    </div>
+  </section>
+</BaseLayout>

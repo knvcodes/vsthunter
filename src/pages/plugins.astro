@@ -1,0 +1,169 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import PluginCard from "../components/PluginCard.astro";
+import SearchBox from "../components/SearchBox.astro";
+import FilterSidebar from "../components/FilterSidebar.astro";
+import { getCollection } from "astro:content";
+
+const allPlugins = await getCollection("plugins", ({ data }) => data.isActive);
+const allTypes = [...new Set(allPlugins.map((p) => p.data.type))];
+const allGenres = [...new Set(allPlugins.flatMap((p) => p.data.genreTags))];
+---
+
+<BaseLayout title="All Plugins">
+  <Header slot="header" />
+  <div class="relative">
+    <div
+      class="fixed inset-0 bg-cover bg-center opacity-10 pointer-events-none"
+      style="background-image: url('/images/bg-studio.webp')"
+    >
+    </div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8"
+      >
+        <div>
+          <h1 class="text-3xl font-bold text-white">All Plugins</h1>
+          <p class="text-dark-300 mt-1">
+            {allPlugins.length} plugins available
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <label for="sort-select" class="text-sm text-dark-300">Sort by:</label
+          >
+          <select
+            id="sort-select"
+            class="px-3 py-2 rounded-lg bg-dark-800 border border-dark-600 text-white text-sm focus:outline-none focus:border-accent cursor-pointer"
+          >
+            <option value="date-desc">Newest First</option>
+            <option value="date-asc">Oldest First</option>
+            <option value="name-asc">Name A-Z</option>
+            <option value="name-desc">Name Z-A</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="lg:grid lg:grid-cols-4 lg:gap-8">
+        <div class="lg:col-span-1 mb-6 lg:mb-0">
+          <div class="lg:sticky lg:top-24">
+            <FilterSidebar />
+          </div>
+        </div>
+
+        <div class="lg:col-span-3 space-y-6">
+          <SearchBox />
+
+          <div
+            id="plugins-grid"
+            class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
+          >
+            {
+              allPlugins.map((plugin) => (
+                <div
+                  class="plugin-card"
+                  data-plugin={JSON.stringify({
+                    slug: plugin.id.replace(/\.md$/, ""),
+                    name: plugin.data.name,
+                    developer: plugin.data.developer,
+                    type: plugin.data.type,
+                    genreTags: plugin.data.genreTags,
+                    osSupport: plugin.data.osSupport,
+                    format: plugin.data.format,
+                    price: plugin.data.price,
+                    dateAdded: plugin.data.dateAdded,
+                  })}
+                >
+                  <PluginCard plugin={plugin} />
+                </div>
+              ))
+            }
+          </div>
+
+          <div id="no-results" class="hidden text-center py-16">
+            <p class="text-xl text-dark-300">No plugins match your filters.</p>
+            <p class="text-sm text-dark-400 mt-2">
+              Try adjusting your search or filter criteria.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import type { PluginData, FilterState } from "../lib/pluginFilter";
+    import {
+      getPluginData,
+      parsePrice,
+      matchesFilters,
+      sortPlugins,
+    } from "../lib/pluginFilter";
+
+    let currentFilters: FilterState = {
+      types: [],
+      oses: [],
+      formats: [],
+      priceFilter: "all",
+      query: "",
+    };
+
+    // Cache all cards once so filters don't lose reference to removed DOM elements
+    let fullCardsList: HTMLElement[] = [];
+
+    function render() {
+      const grid = document.getElementById("plugins-grid");
+      const noResults = document.getElementById("no-results");
+      if (!grid || !noResults) return;
+
+      const filtered = fullCardsList.filter((card) => {
+        const data = getPluginData(card);
+        return data && matchesFilters(data, currentFilters);
+      });
+
+      const sortSelect = document.getElementById(
+        "sort-select",
+      ) as HTMLSelectElement | null;
+      const sortValue = sortSelect?.value ?? "date-desc";
+      const sorted = sortPlugins(filtered, sortValue);
+
+      // Clear grid and re-insert sorted/filtered cards from cache
+      grid.innerHTML = "";
+      sorted.forEach((card) => grid.appendChild(card));
+
+      noResults.classList.toggle("hidden", filtered.length > 0);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const grid = document.getElementById("plugins-grid");
+      if (grid) {
+        fullCardsList = Array.from(
+          grid.querySelectorAll<HTMLElement>(".plugin-card"),
+        );
+      }
+
+      document.addEventListener("plugin-search", ((e: CustomEvent) => {
+        currentFilters.query = e.detail.query;
+        render();
+      }) as EventListener);
+
+      document.addEventListener("plugin-filter", ((e: CustomEvent) => {
+        const d = e.detail;
+        currentFilters.types = d.types;
+        currentFilters.oses = d.oses;
+        currentFilters.formats = d.formats;
+        currentFilters.priceFilter = d.priceFilter;
+        render();
+      }) as EventListener);
+
+      const sortSelect = document.getElementById(
+        "sort-select",
+      ) as HTMLSelectElement;
+      if (sortSelect) {
+        sortSelect.addEventListener("change", render);
+      }
+    });
+  </script>
+</BaseLayout>

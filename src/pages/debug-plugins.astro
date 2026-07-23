@@ -1,0 +1,88 @@
+---
+import { getCollection } from "astro:content";
+
+const plugins = await getCollection("plugins");
+console.log("Plugin count:", plugins.length);
+
+// Debug: log each plugin's data
+plugins.forEach((p) => {
+  console.log(
+    `Plugin: ${p.data.name}, type: ${p.data.type}, active: ${p.data.isActive}`,
+  );
+});
+---
+
+<html>
+  <head>
+    <title>Debug Plugins</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+        background: #111;
+        color: #eee;
+      }
+      .ok {
+        color: #4ade80;
+      }
+      .err {
+        color: #f87171;
+      }
+      pre {
+        background: #1e1e1e;
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+      }
+      .plugin {
+        padding: 0.5rem;
+        border-bottom: 1px solid #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Debug: Plugin Data Loading</h1>
+    <p>Total plugins found: <strong class="ok">{plugins.length}</strong></p>
+
+    <h2>Plugin List</h2>
+    {
+      plugins.length === 0 && (
+        <p class="err">
+          No plugins loaded! Check Astro dev server console for schema
+          validation errors.
+        </p>
+      )
+    }
+
+    {
+      plugins.length > 0 ? (
+        <div>
+          {plugins.map((p) => (
+            <div class="plugin">
+              <p>
+                <strong>{p.data.name}</strong> by {p.data.developer}
+              </p>
+              <p>
+                Type: {p.data.type} | Price: {p.data.price} | Active:{" "}
+                {p.data.isActive ? "✅" : "❌"}
+              </p>
+              <p>
+                OS: {p.data.osSupport.join(", ")} | Formats:{" "}
+                {p.data.format.join(", ")}
+              </p>
+              <p>Genres: {p.data.genreTags.join(", ")}</p>
+              <hr />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <pre class="err">
+          // If empty, check: // 1. src/content/plugins/ directory has .md files
+          with valid --- frontmatter // 2. src/content.config.ts has plugins
+          collection with correct loader path // 3. Astro dev server console for
+          schema validation errors
+        </pre>
+      )
+    }
+  </body>
+</html>

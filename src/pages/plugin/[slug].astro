@@ -1,0 +1,192 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import PluginCard from "../../components/PluginCard.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const plugins = await getCollection("plugins", ({ data }) => data.isActive);
+  return plugins.map((plugin) => ({
+    params: { slug: plugin.id.replace(/\.md$/, "") },
+    props: { plugin },
+  }));
+}
+
+const { plugin } = Astro.props;
+const pluginSlug = plugin.id.replace(/\.md$/, "");
+const { data } = plugin;
+
+const allPlugins = await getCollection("plugins", ({ data }) => data.isActive);
+const related = allPlugins
+  .filter(
+    (p) =>
+      p.id.replace(/\.md$/, "") !== pluginSlug && p.data.type === data.type,
+  )
+  .slice(0, 3);
+
+const typeColors: Record<string, string> = {
+  synth: "bg-accent/20 text-accent-light border-accent/30",
+  effect: "bg-success/20 text-success border-success/30",
+  sampler: "bg-warning/20 text-warning border-warning/30",
+  utility: "bg-dark-500 text-dark-200 border-dark-400",
+};
+---
+
+<BaseLayout title={data.name}>
+  <Header slot="header" />
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <a
+      href="/plugins"
+      class="inline-flex items-center gap-1 text-sm text-dark-300 hover:text-accent-light transition-colors mb-6"
+    >
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Back to Plugins
+    </a>
+
+    <div class="bg-dark-800 rounded-2xl border border-dark-600 overflow-hidden">
+      <div class="aspect-video bg-dark-700 flex items-center justify-center">
+        {
+          data.screenshot ? (
+            <img
+              src={data.screenshot}
+              alt={`${data.name} screenshot`}
+              class="w-full h-full object-cover"
+            />
+          ) : (
+            <div class="text-dark-400 text-lg">No screenshot available</div>
+          )
+        }
+      </div>
+
+      <div class="p-6 sm:p-8 space-y-6">
+        <div
+          class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"
+        >
+          <div>
+            <h1 class="text-3xl sm:text-4xl font-bold text-white">
+              {data.name}
+            </h1>
+            <p class="text-lg text-dark-300 mt-1">by {data.developer}</p>
+          </div>
+          <span
+            class={`shrink-0 self-start px-3 py-1 rounded-lg text-sm font-medium border capitalize ${typeColors[data.type] || typeColors.utility}`}
+          >
+            {data.type}
+          </span>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <span class="text-sm text-dark-300 font-medium">Genres:</span>
+          {
+            data.genreTags.map((tag) => (
+              <a
+                href={`/genre/${tag.toLowerCase().replace(/\s+/g, "-")}`}
+                class="px-3 py-1 rounded-full text-sm bg-dark-700 text-dark-200 hover:bg-accent/20 hover:text-accent-light transition-colors"
+              >
+                {tag}
+              </a>
+            ))
+          }
+        </div>
+
+        <div class="prose prose-invert max-w-none">
+          <p class="text-dark-200 leading-relaxed">{plugin.body}</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <div class="bg-dark-700 rounded-xl p-4">
+            <h3
+              class="text-sm font-semibold text-dark-300 uppercase tracking-wider mb-3"
+            >
+              Supported OS
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              {
+                data.osSupport.map((os) => (
+                  <a
+                    href={`/os/${os}`}
+                    class="px-3 py-1 rounded-lg text-sm bg-dark-600 text-dark-200 hover:bg-accent/20 hover:text-accent-light transition-colors capitalize"
+                  >
+                    {os === "macos" ? "macOS" : os}
+                  </a>
+                ))
+              }
+            </div>
+          </div>
+          <div class="bg-dark-700 rounded-xl p-4">
+            <h3
+              class="text-sm font-semibold text-dark-300 uppercase tracking-wider mb-3"
+            >
+              Formats
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              {
+                data.format.map((fmt) => (
+                  <span class="px-3 py-1 rounded-lg text-sm bg-dark-600 text-dark-200">
+                    {fmt}
+                  </span>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2"
+        >
+          <div class="flex-1">
+            <span class="text-sm text-dark-300">Price</span>
+            <p class="text-2xl font-bold text-accent-light">{data.price}</p>
+          </div>
+          <a
+            href={data.downloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-accent text-white font-semibold hover:bg-accent-dark transition-colors shadow-lg shadow-accent/25"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              ></path>
+            </svg>
+            Download from Official Site
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {
+      related.length > 0 && (
+        <section class="mt-16">
+          <h2 class="text-2xl font-bold text-white mb-6">
+            More {data.type} plugins
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {related.map((p) => (
+              <PluginCard plugin={p} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </div>
+</BaseLayout>

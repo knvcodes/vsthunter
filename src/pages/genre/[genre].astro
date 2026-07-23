@@ -1,0 +1,72 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import PluginCard from "../../components/PluginCard.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const plugins = await getCollection("plugins", ({ data }) => data.isActive);
+  const genres = [...new Set(plugins.flatMap((p) => p.data.genreTags))];
+  return genres.map((genre) => ({
+    params: { genre: genre.toLowerCase().replace(/\s+/g, "-") },
+    props: { genre },
+  }));
+}
+
+const { genre } = Astro.props;
+const allPlugins = await getCollection("plugins", ({ data }) => data.isActive);
+const filteredPlugins = allPlugins.filter((p) =>
+  p.data.genreTags.some(
+    (t) =>
+      t.toLowerCase().replace(/\s+/g, "-") ===
+      genre.toLowerCase().replace(/\s+/g, "-"),
+  ),
+);
+const displayGenre =
+  genre.charAt(0).toUpperCase() + genre.slice(1).replace(/-/g, " ");
+---
+
+<BaseLayout title={`${displayGenre} Plugins`}>
+  <Header slot="header" />
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <a
+      href="/plugins"
+      class="inline-flex items-center gap-1 text-sm text-dark-300 hover:text-accent-light transition-colors mb-6"
+    >
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"></path>
+      </svg>
+      All Plugins
+    </a>
+
+    <h1 class="text-3xl font-bold text-white mb-2 capitalize">
+      {displayGenre} Plugins
+    </h1>
+    <p class="text-dark-300 mb-8">
+      {filteredPlugins.length} plugin{filteredPlugins.length !== 1 ? "s" : ""} found
+    </p>
+
+    {
+      filteredPlugins.length > 0 ? (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPlugins.map((plugin) => (
+            <PluginCard plugin={plugin} />
+          ))}
+        </div>
+      ) : (
+        <p class="text-center text-dark-300 py-16">
+          No plugins found for this genre.
+        </p>
+      )
+    }
+  </div>
+</BaseLayout>

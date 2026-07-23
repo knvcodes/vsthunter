@@ -1,0 +1,145 @@
+---
+
+---
+
+<aside id="filter-sidebar" class="space-y-6">
+  <div>
+    <h3
+      class="text-sm font-semibold text-dark-200 uppercase tracking-wider mb-3"
+    >
+      Type
+    </h3>
+    <div class="space-y-2" id="type-filters">
+      {
+        ["synth", "effect", "sampler", "utility"].map((type) => (
+          <label class="flex items-center gap-2 cursor-pointer group">
+            <input
+              type="checkbox"
+              value={type}
+              class="w-4 h-4 rounded border-dark-500 bg-dark-700 text-accent focus:ring-accent focus:ring-offset-0 cursor-pointer"
+            />
+            <span class="text-sm text-dark-200 group-hover:text-white capitalize transition-colors">
+              {type}
+            </span>
+          </label>
+        ))
+      }
+    </div>
+  </div>
+
+  <div>
+    <h3
+      class="text-sm font-semibold text-dark-200 uppercase tracking-wider mb-3"
+    >
+      OS
+    </h3>
+    <div class="space-y-2" id="os-filters">
+      {
+        ["windows", "macos", "linux"].map((os) => (
+          <label class="flex items-center gap-2 cursor-pointer group">
+            <input
+              type="checkbox"
+              value={os}
+              class="w-4 h-4 rounded border-dark-500 bg-dark-700 text-accent focus:ring-accent focus:ring-offset-0 cursor-pointer"
+            />
+            <span class="text-sm text-dark-200 group-hover:text-white capitalize transition-colors">
+              {os}
+            </span>
+          </label>
+        ))
+      }
+    </div>
+  </div>
+
+  <div>
+    <h3
+      class="text-sm font-semibold text-dark-200 uppercase tracking-wider mb-3"
+    >
+      Format
+    </h3>
+    <div class="space-y-2" id="format-filters">
+      {
+        ["VST3", "VST2", "AU", "AAX", "CLAP", "LV2"].map((fmt) => (
+          <label class="flex items-center gap-2 cursor-pointer group">
+            <input
+              type="checkbox"
+              value={fmt}
+              class="w-4 h-4 rounded border-dark-500 bg-dark-700 text-accent focus:ring-accent focus:ring-offset-0 cursor-pointer"
+            />
+            <span class="text-sm text-dark-200 group-hover:text-white transition-colors">
+              {fmt}
+            </span>
+          </label>
+        ))
+      }
+    </div>
+  </div>
+
+  <div>
+    <h3
+      class="text-sm font-semibold text-dark-200 uppercase tracking-wider mb-3"
+    >
+      Price
+    </h3>
+    <div class="space-y-2" id="sort-options">
+      {
+        [
+          { label: "All", value: "all" },
+          { label: "Free", value: "free" },
+          { label: "Paid", value: "paid" },
+        ].map((opt) => (
+          <label class="flex items-center gap-2 cursor-pointer group">
+            <input
+              type="radio"
+              name="price-sort"
+              value={opt.value}
+              checked={opt.value === "all"}
+              class="w-4 h-4 border-dark-500 bg-dark-700 text-accent focus:ring-accent focus:ring-offset-0 cursor-pointer"
+            />
+            <span class="text-sm text-dark-200 group-hover:text-white transition-colors">
+              {opt.label}
+            </span>
+          </label>
+        ))
+      }
+    </div>
+  </div>
+</aside>
+
+<script>
+  function getSelectedValues(containerId: string): string[] {
+    const container = document.getElementById(containerId);
+    if (!container) return [];
+    return Array.from(
+      container.querySelectorAll<HTMLInputElement>(
+        "input[type=checkbox]:checked",
+      ),
+    ).map((cb) => cb.value);
+  }
+
+  function getSelectedRadioValue(name: string): string {
+    const checked = document.querySelector<HTMLInputElement>(
+      `input[name="${name}"]:checked`,
+    );
+    return checked?.value ?? "all";
+  }
+
+  function applyFilters() {
+    const types = getSelectedValues("type-filters");
+    const oses = getSelectedValues("os-filters");
+    const formats = getSelectedValues("format-filters");
+    const priceFilter = getSelectedRadioValue("price-sort");
+
+    document.dispatchEvent(
+      new CustomEvent("plugin-filter", {
+        detail: { types, oses, formats, priceFilter },
+      }),
+    );
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("#filter-sidebar input").forEach((input) => {
+      input.addEventListener("change", applyFilters);
+    });
+  });
+</script>
