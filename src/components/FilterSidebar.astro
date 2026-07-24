@@ -1,112 +1,101 @@
 ---
+// ─── Filter Configuration ─────────────────────────────────────────
 
+interface CheckboxFilter {
+  kind: "checkbox";
+  id: string;
+  title: string;
+  options: string[];
+}
+
+interface RadioFilter {
+  kind: "radio";
+  id: string;
+  title: string;
+  name: string;
+  options: { label: string; value: string; checked?: boolean }[];
+}
+
+type FilterSection = CheckboxFilter | RadioFilter;
+
+const filterSections: FilterSection[] = [
+  {
+    kind: "checkbox",
+    id: "type-filters",
+    title: "Type",
+    options: ["synth", "effect", "sampler", "utility"],
+  },
+  {
+    kind: "checkbox",
+    id: "os-filters",
+    title: "OS",
+    options: ["windows", "macos", "linux"],
+  },
+  {
+    kind: "checkbox",
+    id: "format-filters",
+    title: "Format",
+    options: ["VST3", "VST2", "AU", "AAX", "CLAP", "LV2"],
+  },
+  {
+    kind: "radio",
+    id: "price-filters",
+    title: "Price",
+    name: "price-sort",
+    options: [
+      { label: "All", value: "all", checked: true },
+      { label: "Free", value: "free" },
+      { label: "Paid", value: "paid" },
+    ],
+  },
+];
 ---
 
-<aside id="filter-sidebar" class="space-y-6">
-  <div>
-    <h3
-      class="text-sm font-semibold text-dark-200 uppercase tracking-wider mb-3"
-    >
-      Type
-    </h3>
-    <div class="space-y-2" id="type-filters">
-      {
-        ["synth", "effect", "sampler", "utility"].map((type) => (
-          <label class="flex items-center gap-2 cursor-pointer group">
-            <input
-              type="checkbox"
-              value={type}
-              class="w-4 h-4 rounded border-dark-500 bg-dark-700 text-accent focus:ring-accent focus:ring-offset-0 cursor-pointer"
-            />
-            <span class="text-sm text-dark-200 group-hover:text-white capitalize transition-colors">
-              {type}
-            </span>
-          </label>
-        ))
-      }
-    </div>
-  </div>
+<aside id="filter-sidebar" class="space-y-8">
+  {
+    filterSections.map((section) => (
+      <div>
+        <h3 class="font-bold text-dark-200 uppercase tracking-[0.15em] mb-4">
+          {section.title}
+        </h3>
 
-  <div>
-    <h3
-      class="text-sm font-semibold text-dark-200 uppercase tracking-wider mb-3"
-    >
-      OS
-    </h3>
-    <div class="space-y-2" id="os-filters">
-      {
-        ["windows", "macos", "linux"].map((os) => (
-          <label class="flex items-center gap-2 cursor-pointer group">
-            <input
-              type="checkbox"
-              value={os}
-              class="w-4 h-4 rounded border-dark-500 bg-dark-700 text-accent focus:ring-accent focus:ring-offset-0 cursor-pointer"
-            />
-            <span class="text-sm text-dark-200 group-hover:text-white capitalize transition-colors">
-              {os}
-            </span>
-          </label>
-        ))
-      }
-    </div>
-  </div>
-
-  <div>
-    <h3
-      class="text-sm font-semibold text-dark-200 uppercase tracking-wider mb-3"
-    >
-      Format
-    </h3>
-    <div class="space-y-2" id="format-filters">
-      {
-        ["VST3", "VST2", "AU", "AAX", "CLAP", "LV2"].map((fmt) => (
-          <label class="flex items-center gap-2 cursor-pointer group">
-            <input
-              type="checkbox"
-              value={fmt}
-              class="w-4 h-4 rounded border-dark-500 bg-dark-700 text-accent focus:ring-accent focus:ring-offset-0 cursor-pointer"
-            />
-            <span class="text-sm text-dark-200 group-hover:text-white transition-colors">
-              {fmt}
-            </span>
-          </label>
-        ))
-      }
-    </div>
-  </div>
-
-  <div>
-    <h3
-      class="text-sm font-semibold text-dark-200 uppercase tracking-wider mb-3"
-    >
-      Price
-    </h3>
-    <div class="space-y-2" id="sort-options">
-      {
-        [
-          { label: "All", value: "all" },
-          { label: "Free", value: "free" },
-          { label: "Paid", value: "paid" },
-        ].map((opt) => (
-          <label class="flex items-center gap-2 cursor-pointer group">
-            <input
-              type="radio"
-              name="price-sort"
-              value={opt.value}
-              checked={opt.value === "all"}
-              class="w-4 h-4 border-dark-500 bg-dark-700 text-accent focus:ring-accent focus:ring-offset-0 cursor-pointer"
-            />
-            <span class="text-sm text-dark-200 group-hover:text-white transition-colors">
-              {opt.label}
-            </span>
-          </label>
-        ))
-      }
-    </div>
-  </div>
+        <div class="space-y-3" id={section.id}>
+          {section.kind === "checkbox"
+            ? section.options.map((opt) => (
+                <label class="flex items-center justify-between cursor-pointer group">
+                  <span class="text-sm text-dark-300 group-hover:text-white transition-colors duration-200 capitalize">
+                    {opt}
+                  </span>
+                  <input type="checkbox" value={opt} class="peer sr-only" />
+                  <span class="relative w-9 h-5 bg-dark-600 rounded-full peer-checked:bg-accent transition-colors duration-200 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-transform after:duration-200 peer-checked:after:translate-x-4" />
+                </label>
+              ))
+            : section.options.map((opt) => (
+                <label class="flex items-center gap-3 cursor-pointer group">
+                  <span class="relative flex items-center justify-center w-4 h-4">
+                    <input
+                      type="radio"
+                      name={section.name}
+                      value={opt.value}
+                      checked={opt.checked ?? false}
+                      class="peer w-4 h-4 appearance-none rounded-full border-2 border-dark-500 bg-dark-700 checked:border-accent checked:bg-accent transition-colors duration-200 cursor-pointer"
+                    />
+                    <span class="absolute w-1.5 h-1.5 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 pointer-events-none" />
+                  </span>
+                  <span class="text-sm text-dark-300 group-hover:text-white transition-colors duration-200">
+                    {opt.label}
+                  </span>
+                </label>
+              ))}
+        </div>
+      </div>
+    ))
+  }
 </aside>
 
 <script>
+  // ─── Helpers ─────────────────────────────────────────────────────
+
   function getSelectedValues(containerId: string): string[] {
     const container = document.getElementById(containerId);
     if (!container) return [];
@@ -124,22 +113,24 @@
     return checked?.value ?? "all";
   }
 
-  function applyFilters() {
-    const types = getSelectedValues("type-filters");
-    const oses = getSelectedValues("os-filters");
-    const formats = getSelectedValues("format-filters");
-    const priceFilter = getSelectedRadioValue("price-sort");
+  // ─── Apply Filters ───────────────────────────────────────────────
 
-    document.dispatchEvent(
-      new CustomEvent("plugin-filter", {
-        detail: { types, oses, formats, priceFilter },
-      }),
-    );
+  function applyFilters() {
+    const detail = {
+      types: getSelectedValues("type-filters"),
+      oses: getSelectedValues("os-filters"),
+      formats: getSelectedValues("format-filters"),
+      priceFilter: getSelectedRadioValue("price-sort"),
+    };
+
+    document.dispatchEvent(new CustomEvent("plugin-filter", { detail }));
   }
 
+  // ─── Init ────────────────────────────────────────────────────────
+
   document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("#filter-sidebar input").forEach((input) => {
-      input.addEventListener("change", applyFilters);
-    });
+    document
+      .querySelectorAll("#filter-sidebar input")
+      .forEach((input) => input.addEventListener("change", applyFilters));
   });
 </script>
